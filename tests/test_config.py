@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest.mock import patch
 
+from flask_appbuilder.security.manager import AUTH_DB
+
 from config import load_config
 
 
@@ -52,6 +54,23 @@ class LoadConfigTests(unittest.TestCase):
         with patch.dict(os.environ, environment, clear=True):
             with self.assertRaisesRegex(RuntimeError, "DB_PORT"):
                 load_config()
+
+    def test_configures_database_auth_without_public_registration(self) -> None:
+        environment = {
+            "SECRET_KEY": "a" * 64,
+            "DB_NAME": "uab_gym",
+            "DB_USER": "root",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            config = load_config()
+
+        self.assertEqual(config["AUTH_TYPE"], AUTH_DB)
+        self.assertEqual(config["AUTH_ROLE_ADMIN"], "Admin")
+        self.assertFalse(config["AUTH_USER_REGISTRATION"])
+        self.assertFalse(config["AUTH_ROLES_SYNC_AT_LOGIN"])
+        self.assertTrue(config["WTF_CSRF_ENABLED"])
+        self.assertTrue(config["SESSION_COOKIE_HTTPONLY"])
+        self.assertEqual(config["SESSION_COOKIE_SAMESITE"], "Lax")
 
 
 if __name__ == "__main__":

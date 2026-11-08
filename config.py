@@ -1,5 +1,6 @@
 import os
 
+from flask_appbuilder.security.manager import AUTH_DB
 from sqlalchemy.engine import URL
 
 
@@ -41,4 +42,11 @@ def load_config() -> dict[str, object]:
         "SECRET_KEY": secret_key,
         "SQLALCHEMY_DATABASE_URI": database_url,
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+        "AUTH_TYPE": AUTH_DB,
+        "AUTH_ROLE_ADMIN": "Admin",
+        "AUTH_USER_REGISTRATION": False,
+        "AUTH_ROLES_SYNC_AT_LOGIN": False,
+        "WTF_CSRF_ENABLED": True,
+        "SESSION_COOKIE_HTTPONLY": True,
+        "SESSION_COOKIE_SAMESITE": "Lax",
     }

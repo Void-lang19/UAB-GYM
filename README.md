@@ -114,7 +114,7 @@ flask --app app:create_app run --debug
 
 Abre `http://127.0.0.1:5000` en el navegador. Detén el servidor con `Ctrl+C`.
 
-En la primera inicialización, Flask-AppBuilder crea sus tablas internas de seguridad y permisos en `uab_gym`. Aún no se crea un usuario administrador.
+En la primera inicialización, Flask-AppBuilder crea sus tablas internas de seguridad y permisos en `uab_gym`. Antes de utilizar las vistas privadas, crea el primer administrador con el comando de la sección de autenticación.
 
 ## CRUD de socios
 
@@ -133,6 +133,18 @@ El borrado físico está deshabilitado; los entrenadores se pueden desactivar si
 La sección **Gimnasio → Planes** permite registrar, buscar, consultar y editar planes por nombre, duración, precio, beneficios y estado. La duración se expresa en días y debe ser positiva; el precio puede ser cero, pero no negativo. Los nombres de plan son únicos.
 
 El borrado físico está deshabilitado; los planes pueden desactivarse para conservar la referencia de membresías. La lista y sus acciones requieren iniciar sesión.
+
+## Autenticación y administrador
+
+Flask-AppBuilder proporciona las páginas de inicio y cierre de sesión (`/login/` y `/logout/`) y protege las vistas con permisos. La autenticación configurada es de base de datos, el registro público está deshabilitado, las solicitudes usan CSRF y las cookies de sesión son `HttpOnly` y `SameSite=Lax`.
+
+Con el entorno virtual activo, MySQL iniciado y `.env` configurado, crea el primer usuario administrador de forma interactiva:
+
+```powershell
+flask --app app:create_app fab create-admin
+```
+
+Responde las preguntas del asistente y escribe la contraseña en el prompt oculto; Flask-AppBuilder la almacenará con hash. No guardes esa contraseña en archivos ni en comandos. El rol `Admin` recibe los permisos administrativos. La asignación de permisos a `Recepcionista` y `Entrenador` queda pendiente de coordinación con el segundo integrante.
 
 ### 7. Ejecutar las pruebas
 
@@ -168,7 +180,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes ya están disponibles; la creación de usuarios administradores y la coordinación de roles quedan para sus etapas.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes ya están disponibles; la asignación de permisos a los roles Recepcionista y Entrenador queda pendiente de coordinación.
 
 ## Flujo de trabajo Git
 
