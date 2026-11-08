@@ -26,4 +26,13 @@ def create_app() -> Flask:
             ).one()
         click.echo(f"Conexión correcta: {database} (servidor {version}).")
 
+    @app.cli.command("init-db")
+    def init_db() -> None:
+        from app import models
+
+        db.create_all()
+        click.echo(
+            "Tablas creadas o ya existentes: socios, entrenadores y planes."
+        )
+
     return app

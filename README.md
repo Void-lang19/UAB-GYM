@@ -90,9 +90,17 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
 
-### 6. Comprobar la conexión y ejecutar
+### 6. Crear las tablas iniciales, comprobar la conexión y ejecutar
 
-Con MySQL iniciado y `.env` configurado, verifica la conexión a `uab_gym`:
+Con MySQL iniciado y `.env` configurado, crea las tablas de los módulos iniciales:
+
+```powershell
+flask --app app:create_app init-db
+```
+
+El comando crea `socios`, `entrenadores` y `planes` si todavía no existen; no elimina ni reinicia tablas. Flask-AppBuilder también administra sus tablas internas de seguridad. Las relaciones para membresías y los módulos del segundo integrante se incorporarán al acordar sus nombres y claves foráneas.
+
+Verifica la conexión a `uab_gym`:
 
 ```powershell
 flask --app app:create_app check-db
@@ -106,7 +114,7 @@ flask --app app:create_app run --debug
 
 Abre `http://127.0.0.1:5000` en el navegador. Detén el servidor con `Ctrl+C`.
 
-En la primera inicialización, Flask-AppBuilder crea sus tablas internas de seguridad y permisos en `uab_gym`. Aún no se crea un usuario administrador ni tablas de los módulos del gimnasio; eso se realizará en etapas posteriores.
+En la primera inicialización, Flask-AppBuilder crea sus tablas internas de seguridad y permisos en `uab_gym`. Aún no se crea un usuario administrador.
 
 ### 7. Ejecutar las pruebas
 
@@ -121,9 +129,11 @@ python -m unittest discover -s tests -v
 ```text
 UAB-GYM/
 ├── app/
-│   └── __init__.py       # Fábrica Flask-AppBuilder y comando check-db
+│   ├── __init__.py       # Fábrica Flask-AppBuilder y comandos de base de datos
+│   └── models.py         # Esquema inicial de socios, entrenadores y planes
 ├── tests/
-│   └── test_config.py    # Pruebas de configuración
+│   ├── test_config.py    # Pruebas de configuración
+│   └── test_models.py    # Pruebas de tablas y restricciones
 ├── .env.example          # Plantilla sin credenciales reales
 ├── .gitignore
 ├── config.py             # Configuración de secretos y conexión MySQL
@@ -131,7 +141,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-La etapa inicial no incluye todavía modelos de negocio, CRUD, migraciones ni usuarios administradores; se incorporarán en sus etapas correspondientes.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Esta etapa define el esquema inicial, pero todavía no incluye las vistas CRUD ni usuarios administradores.
 
 ## Flujo de trabajo Git
 
