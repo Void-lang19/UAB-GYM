@@ -122,6 +122,12 @@ La sección **Gimnasio → Socios** permite registrar, buscar, consultar y edita
 
 El borrado físico está deshabilitado. Para conservar el historial que necesitarán las membresías, un usuario con permisos puede desactivar socios desde la acción de la tabla o cambiar su estado en el formulario. La pantalla requiere iniciar sesión; la creación de usuarios y la asignación de roles se documentarán en la etapa de autenticación.
 
+## CRUD de entrenadores
+
+La sección **Gimnasio → Entrenadores** permite registrar, buscar, consultar y editar entrenadores. La búsqueda incluye nombres, apellidos, documento, correo, especialidad y estado. Se validan los campos requeridos, el formato del correo y que la fecha de contratación no sea futura.
+
+El borrado físico está deshabilitado; los entrenadores se pueden desactivar sin borrar su información. La lista y sus acciones requieren iniciar sesión.
+
 ### 7. Ejecutar las pruebas
 
 Con el entorno virtual activo:
@@ -139,10 +145,13 @@ UAB-GYM/
 │   ├── models.py         # Esquema inicial de socios, entrenadores y planes
 │   └── views/
 │       ├── __init__.py
-│       └── socios.py     # Vista CRUD, validaciones y desactivación lógica
+│       ├── base.py       # Desactivación lógica compartida
+│       ├── entrenadores.py
+│       └── socios.py     # Vistas CRUD, validaciones y desactivación lógica
 ├── tests/
 │   ├── test_config.py    # Pruebas de configuración
 │   ├── test_models.py    # Pruebas de tablas y restricciones
+│   ├── test_entrenador_view.py
 │   └── test_socio_view.py # Pruebas de configuración del CRUD de socios
 ├── .env.example          # Plantilla sin credenciales reales
 ├── .gitignore
@@ -151,7 +160,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. El CRUD de socios ya está disponible; los CRUD de entrenadores y planes y la creación de usuarios administradores quedan para sus etapas.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios y entrenadores ya están disponibles; el CRUD de planes y la creación de usuarios administradores quedan para sus etapas.
 
 ## Flujo de trabajo Git
 

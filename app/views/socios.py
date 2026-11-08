@@ -1,17 +1,12 @@
-import logging
 from datetime import date
 
-from flask import Response, flash, redirect
-from flask_appbuilder import ModelView, action
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from sqlalchemy.exc import SQLAlchemyError
 from wtforms import DateField, Form, SelectField
 from wtforms.validators import DataRequired, Email, Length, Optional, ValidationError
 
 from app import db
 from app.models import Socio
-
-logger = logging.getLogger(__name__)
+from app.views.base import ESTADO_CHOICES, SoftDeactivateModelView
 
 
 def validate_fecha_nacimiento(_form: Form, field: DateField) -> None:
@@ -19,15 +14,14 @@ def validate_fecha_nacimiento(_form: Form, field: DateField) -> None:
         raise ValidationError("La fecha de nacimiento no puede ser futura.")
 
 
-class SocioModelView(ModelView):
+class SocioModelView(SoftDeactivateModelView):
     datamodel = SQLAInterface(Socio, db.session)
     route_base = "/socios"
+    entity_plural = "socios"
     list_title = "Socios"
     add_title = "Registrar socio"
     edit_title = "Editar socio"
     show_title = "Información del socio"
-    can_delete = False
-    exclude_route_methods = {"delete"}
     base_order = ("apellidos", "asc")
 
     list_columns = [
@@ -98,11 +92,10 @@ class SocioModelView(ModelView):
         "fecha_nacimiento": [Optional(), validate_fecha_nacimiento],
         "direccion": [Optional(), Length(max=255)],
     }
-    _estados = [("activo", "Activo"), ("inactivo", "Inactivo")]
     add_form_extra_fields = {
         "estado": SelectField(
             "Estado",
-            choices=_estados,
+            choices=ESTADO_CHOICES,
             default="activo",
             validators=[DataRequired()],
         )
@@ -110,37 +103,7 @@ class SocioModelView(ModelView):
     edit_form_extra_fields = {
         "estado": SelectField(
             "Estado",
-            choices=_estados,
+            choices=ESTADO_CHOICES,
             validators=[DataRequired()],
         )
     }
-
-    @action(
-        "desactivar",
-        "Desactivar",
-        "¿Desactivar los socios seleccionados? Sus datos se conservarán.",
-        "fa-user-slash",
-    )
-    def desactivar(self, items: Socio | list[Socio]) -> Response:
-        socios = items if isinstance(items, list) else [items]
-        activos = [socio for socio in socios if socio.estado != "inactivo"]
-        if not activos:
-            flash("Los socios seleccionados ya están inactivos.", "info")
-            return redirect(self.get_redirect())
-
-        try:
-            for socio in activos:
-                socio.estado = "inactivo"
-                self.datamodel.edit(socio, commit=False)
-            self.datamodel.session.commit()
-        except SQLAlchemyError:
-            self.datamodel.session.rollback()
-            logger.exception("No se pudieron desactivar los socios seleccionados.")
-            flash(
-                "No se pudieron desactivar los socios. Inténtalo nuevamente.",
-                "danger",
-            )
-            return redirect(self.get_redirect())
-
-        flash(f"Se desactivaron {len(activos)} socio(s).", "success")
-        return redirect(self.get_redirect())

@@ -48,6 +48,7 @@ class SocioModelViewTests(unittest.TestCase):
     def test_deactivation_preserves_records_and_commits_state_change(self) -> None:
         socio = SimpleNamespace(estado="activo")
         view = SimpleNamespace(
+            entity_plural="socios",
             datamodel=SimpleNamespace(
                 edit=Mock(),
                 session=SimpleNamespace(commit=Mock(), rollback=Mock()),
@@ -55,8 +56,8 @@ class SocioModelViewTests(unittest.TestCase):
             get_redirect=Mock(return_value="/socios/list/"),
         )
         with (
-            patch("app.views.socios.flash") as flash,
-            patch("app.views.socios.redirect", return_value="/socios/list/"),
+            patch("app.views.base.flash") as flash,
+            patch("app.views.base.redirect", return_value="/socios/list/"),
         ):
             result = SocioModelView.desactivar(view, [socio])
 
