@@ -217,7 +217,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes y los permisos iniciales de Recepcionista y Entrenador están disponibles. El filtrado de datos asignados y los permisos de módulos aún no implementados quedan pendientes de integrar con el segundo integrante.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. En esta rama están disponibles los CRUD de socios, entrenadores, planes, membresías, pagos y asistencias, junto con los tres reportes administrativos descritos abajo. El rol Entrenador solo puede consultar planes hasta que exista una relación verificable de asignación; no tiene acceso a información personal, asistencias ni reportes.
 
 ## Flujo de trabajo Git
 
@@ -344,12 +344,12 @@ Los textos que podrían interpretarse como fórmulas (`=`, `+`, `-`, `@`, tabula
 
 Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py` y `test_reportes_security.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, accesos por URL, errores y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
 
-**Estas pruebas no se ejecutaron en el equipo de desarrollo actual.** No se instaló Python ni XAMPP, no se inició Flask ni se conectó a MySQL. La revisión estática no sustituye la validación de ejecución. En el otro equipo:
+**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 59 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB aún deben comprobarse en el entorno que tenga XAMPP:
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-Queda verificar el arranque con Flask-AppBuilder 5.3.0, el renderizado de las pantallas, los permisos por sesión, las descargas en Excel y las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios). Los reportes no requieren migraciones ni nuevas dependencias.
+Queda verificar las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios) y la apertura de los CSV en Excel en el equipo de despliegue. Los reportes no requieren migraciones ni nuevas dependencias.
 
-La revisión estática corrigió la prueba de permisos que comparaba únicamente las vistas iniciales contra una política que ya incluía módulos adicionales: ahora usa `MANAGED_VIEW_MENUS`. También detectó incidencias anteriores fuera del alcance de reportes que deben comprobarse antes de una validación integral: `validar_pago()` condiciona el control de sobrepago a `estado == 'valido'`, pero un objeto nuevo puede tener `estado=None` antes del INSERT; y el doble `SimpleNamespace` de la prueba de desactivación de socios no define `estado_inactivo`, requerido por la vista actual. Se documentan sin cambiar la lógica de los CRUD en esta etapa.
+La inicialización de las vistas excluye las propiedades híbridas de los campos de búsqueda de Flask-AppBuilder, que solo admite columnas mapeadas en ese formulario. La validación de pagos nuevos considera `estado=None` como válido, igual que el valor predeterminado aplicado al insertar.

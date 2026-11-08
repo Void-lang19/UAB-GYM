@@ -46,7 +46,9 @@ class MembresiaModelView(SoftDeactivateModelView):
     show_columns = ["socio", "plan", "fecha_inicio", "fecha_fin", "precio_pactado", "estado", "vigencia", "fecha_registro", "observaciones", "fecha_cancelacion", "motivo_cancelacion"]
     add_columns = ["socio", "plan", "fecha_inicio", "observaciones"]
     edit_columns = ["socio", "plan", "fecha_inicio", "observaciones", "estado"]
-    search_columns = ["socio", "plan", "estado", "vigencia", "fecha_inicio", "fecha_fin"]
+    # Flask-AppBuilder builds search fields from database columns; ``vigencia``
+    # is a hybrid display property and is not searchable through its converter.
+    search_columns = ["socio", "plan", "estado", "fecha_inicio", "fecha_fin"]
     label_columns = {"socio": "Socio", "plan": "Plan", "fecha_inicio": "Inicio", "fecha_fin": "Vencimiento", "precio_pactado": "Precio pactado", "estado": "Estado administrativo", "vigencia": "Vigencia", "fecha_registro": "Registrada", "observaciones": "Observaciones"}
     validators_columns = {"fecha_inicio": [DataRequired(), validar_inicio, validar_reglas_contratacion], "observaciones": [Optional()]}
     add_form_extra_fields = {"fecha_inicio": DateField("Fecha de inicio", validators=[DataRequired(), validar_inicio, validar_reglas_contratacion])}

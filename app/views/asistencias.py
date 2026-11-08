@@ -41,7 +41,8 @@ class AsistenciaModelView(ModelView):
     show_columns = list_columns + ["observaciones", "anulada"]
     add_columns = ["socio", "membresia", "observaciones"]
     edit_columns = ["socio", "membresia", "fecha_hora_entrada", "fecha_hora_salida", "observaciones"]
-    search_columns = ["socio", "fecha_hora_entrada", "membresia", "estado"]
+    # ``estado`` is a hybrid property; FAB's search form only accepts mapped fields.
+    search_columns = ["socio", "fecha_hora_entrada", "membresia"]
     label_columns = {"socio": "Socio", "membresia": "Membresía", "fecha_hora_entrada": "Entrada", "fecha_hora_salida": "Salida", "estado": "Estado", "observaciones": "Observaciones", "anulada": "Anulada"}
     edit_form_extra_fields = {
         "fecha_hora_entrada": DateTimeField("Fecha y hora de entrada", validators=[validar_reglas_asistencia]),

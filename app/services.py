@@ -99,7 +99,7 @@ def validar_pago(pago: Pago, *, excluir_pago_id: int | None = None) -> None:
         raise ValueError("El monto del pago debe ser mayor que cero.")
     if pago.metodo_pago not in METODOS_PAGO:
         raise ValueError("Selecciona un método de pago válido.")
-    if pago.estado == "valido" and total_pagado(membresia.id, excluir_pago_id=excluir_pago_id) + monto > Decimal(membresia.precio_pactado):
+    if (pago.estado or "valido") == "valido" and total_pagado(membresia.id, excluir_pago_id=excluir_pago_id) + monto > Decimal(membresia.precio_pactado):
         raise ValueError("El pago supera el saldo pendiente de la membresía.")
     pago.monto = monto
 

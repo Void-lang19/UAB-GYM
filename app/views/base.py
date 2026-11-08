@@ -28,7 +28,8 @@ class SoftDeactivateModelView(ModelView):
     )
     def desactivar(self, items: Desactivable | list[Desactivable]) -> Response:
         registros = items if isinstance(items, list) else [items]
-        activos = [registro for registro in registros if registro.estado != self.estado_inactivo]
+        estado_inactivo = getattr(self, "estado_inactivo", "inactivo")
+        activos = [registro for registro in registros if registro.estado != estado_inactivo]
         if not activos:
             flash(
                 f"Los {self.entity_plural} seleccionados ya están inactivos.",
@@ -38,7 +39,7 @@ class SoftDeactivateModelView(ModelView):
 
         try:
             for registro in activos:
-                registro.estado = self.estado_inactivo
+                registro.estado = estado_inactivo
                 self.datamodel.edit(registro, commit=False)
             self.datamodel.session.commit()
         except SQLAlchemyError:
