@@ -9,6 +9,9 @@ ROLE_PERMISSIONS: dict[str, frozenset[tuple[str, str]]] = {
             ("menu_access", "Socios"),
             ("menu_access", "Entrenadores"),
             ("menu_access", "Planes"),
+            ("menu_access", "Membresías"),
+            ("menu_access", "Pagos"),
+            ("menu_access", "Asistencias"),
             ("can_list", "SocioModelView"),
             ("can_show", "SocioModelView"),
             ("can_add", "SocioModelView"),
@@ -18,6 +21,19 @@ ROLE_PERMISSIONS: dict[str, frozenset[tuple[str, str]]] = {
             ("can_show", "EntrenadorModelView"),
             ("can_list", "PlanModelView"),
             ("can_show", "PlanModelView"),
+            ("can_list", "MembresiaModelView"),
+            ("can_show", "MembresiaModelView"),
+            ("can_add", "MembresiaModelView"),
+            ("can_edit", "MembresiaModelView"),
+            ("renovar", "MembresiaModelView"),
+            ("desactivar", "MembresiaModelView"),
+            ("can_list", "PagoModelView"),
+            ("can_show", "PagoModelView"),
+            ("can_add", "PagoModelView"),
+            ("can_list", "AsistenciaModelView"),
+            ("can_show", "AsistenciaModelView"),
+            ("can_add", "AsistenciaModelView"),
+            ("registrar_salida", "AsistenciaModelView"),
         }
     ),
     "Entrenador": frozenset(
@@ -39,6 +55,12 @@ MANAGED_VIEW_MENUS = frozenset(
         "EntrenadorModelView",
         "Planes",
         "PlanModelView",
+        "Membresías",
+        "Pagos",
+        "Asistencias",
+        "MembresiaModelView",
+        "PagoModelView",
+        "AsistenciaModelView",
     }
 )
 

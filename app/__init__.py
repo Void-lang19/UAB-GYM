@@ -17,7 +17,7 @@ def create_app() -> Flask:
     db.init_app(app)
     with app.app_context():
         appbuilder.init_app(app, db.session)
-        from app.views import EntrenadorModelView, PlanModelView, SocioModelView
+        from app.views import (AsistenciaModelView, EntrenadorModelView, MembresiaModelView, PagoModelView, PlanModelView, SocioModelView)
 
         appbuilder.add_view(
             SocioModelView,
@@ -38,6 +38,9 @@ def create_app() -> Flask:
             icon="fa-list-alt",
             category="Gimnasio",
         )
+        appbuilder.add_view(MembresiaModelView, "Membresías", icon="fa-id-card", category="Gimnasio")
+        appbuilder.add_view(PagoModelView, "Pagos", icon="fa-money", category="Gimnasio")
+        appbuilder.add_view(AsistenciaModelView, "Asistencias", icon="fa-calendar-check-o", category="Gimnasio")
 
     @app.cli.command("check-db")
     def check_db() -> None:
@@ -52,9 +55,7 @@ def create_app() -> Flask:
         from app import models
 
         db.create_all()
-        click.echo(
-            "Tablas creadas o ya existentes: socios, entrenadores y planes."
-        )
+        click.echo("Tablas creadas o ya existentes: socios, entrenadores, planes, membresias, pagos y asistencias.")
 
     @app.cli.command("configure-roles")
     def configure_roles() -> None:

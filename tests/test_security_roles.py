@@ -124,11 +124,17 @@ class SecurityRoleTests(unittest.TestCase):
             "/socios/add",
             "/entrenadores/list/",
             "/planes/list/",
+            "/membresias/list/",
+            "/membresias/add",
+            "/pagos/list/",
+            "/pagos/add",
+            "/asistencias/list/",
+            "/asistencias/add",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 200)
 
-        for path in ("/entrenadores/add", "/planes/add", "/socios/download/csv"):
+        for path in ("/entrenadores/add", "/planes/add", "/socios/download/csv", "/pagos/edit/1", "/asistencias/edit/1"):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 403)
 
@@ -149,6 +155,9 @@ class SecurityRoleTests(unittest.TestCase):
             "/entrenadores/list/",
             "/entrenadores/add",
             "/planes/add",
+            "/membresias/add",
+            "/pagos/add",
+            "/asistencias/add",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 403)
@@ -165,6 +174,9 @@ class SecurityRoleTests(unittest.TestCase):
             "/socios/add",
             "/entrenadores/add",
             "/planes/add",
+            "/membresias/list/",
+            "/pagos/list/",
+            "/asistencias/list/",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 200)

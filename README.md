@@ -228,3 +228,29 @@ Después crea un Pull Request hacia `develop` y espera la revisión antes de int
 - **No existe `uab_gym`:** créala en phpMyAdmin siguiendo la sección correspondiente.
 - **No se encuentra el comando `flask`:** activa `.venv` e instala las dependencias con `python -m pip install -r requirements.txt`.
 - **No se activa el entorno virtual:** utiliza el comando `Set-ExecutionPolicy -Scope Process ...` indicado arriba.
+# Membresías, pagos y asistencias
+
+Los módulos administrativos nuevos están disponibles bajo la categoría **Gimnasio**:
+
+- **Membresías**: vincula un socio activo con un plan activo. El vencimiento se calcula de forma inclusiva según la duración del plan, se conserva el precio pactado y se rechazan períodos superpuestos. La cancelación y renovación conservan el historial.
+- **Pagos**: registra pagos parciales con Efectivo, Transferencia bancaria, QR u Otro. El saldo se deriva de los pagos válidos y los pagos anulados se conservan junto con fecha y motivo de anulación.
+- **Asistencias**: valida socio y membresía vigentes para registrar entradas, previene entradas abiertas duplicadas y permite registrar la salida posteriormente.
+
+## Base de datos
+
+El comando existente `flask init-db` crea las tablas nuevas `membresias`, `pagos` y `asistencias` cuando no existen. `db.create_all()` no actualiza tablas ya existentes; estas adiciones no requieren cambiar las tablas previas. Ejecuta los comandos de la aplicación con la misma configuración de entorno que el resto del proyecto:
+
+```powershell
+flask --app app:create_app init-db
+flask --app app:create_app configure-roles
+```
+
+Recepcionista puede consultar y gestionar membresías, registrar pagos y operar entradas y salidas. No puede editar ni anular pagos ni corregir o anular asistencias. Entrenador no recibe acceso a datos personales o financieros. Admin conserva los permisos completos administrados por Flask-AppBuilder.
+
+Las operaciones de membresías, pagos y asistencias se centralizan en `app/services.py` para que las vistas y las pruebas apliquen las mismas validaciones. Las fechas de asistencia se guardan como `DateTime` sin zona; el reloj de la aplicación las genera en `America/La_Paz`.
+
+## Pruebas
+
+```powershell
+python -m unittest discover -s tests -v
+```
