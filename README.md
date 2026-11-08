@@ -116,6 +116,12 @@ Abre `http://127.0.0.1:5000` en el navegador. Detén el servidor con `Ctrl+C`.
 
 En la primera inicialización, Flask-AppBuilder crea sus tablas internas de seguridad y permisos en `uab_gym`. Aún no se crea un usuario administrador.
 
+## CRUD de socios
+
+La sección **Gimnasio → Socios** permite registrar, buscar, consultar y editar socios. Se puede buscar por nombres, apellidos, documento, correo y estado. El documento es obligatorio; el correo, si se proporciona, debe tener formato válido; y la fecha de nacimiento no puede estar en el futuro.
+
+El borrado físico está deshabilitado. Para conservar el historial que necesitarán las membresías, un usuario con permisos puede desactivar socios desde la acción de la tabla o cambiar su estado en el formulario. La pantalla requiere iniciar sesión; la creación de usuarios y la asignación de roles se documentarán en la etapa de autenticación.
+
 ### 7. Ejecutar las pruebas
 
 Con el entorno virtual activo:
@@ -130,10 +136,14 @@ python -m unittest discover -s tests -v
 UAB-GYM/
 ├── app/
 │   ├── __init__.py       # Fábrica Flask-AppBuilder y comandos de base de datos
-│   └── models.py         # Esquema inicial de socios, entrenadores y planes
+│   ├── models.py         # Esquema inicial de socios, entrenadores y planes
+│   └── views/
+│       ├── __init__.py
+│       └── socios.py     # Vista CRUD, validaciones y desactivación lógica
 ├── tests/
 │   ├── test_config.py    # Pruebas de configuración
-│   └── test_models.py    # Pruebas de tablas y restricciones
+│   ├── test_models.py    # Pruebas de tablas y restricciones
+│   └── test_socio_view.py # Pruebas de configuración del CRUD de socios
 ├── .env.example          # Plantilla sin credenciales reales
 ├── .gitignore
 ├── config.py             # Configuración de secretos y conexión MySQL
@@ -141,7 +151,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Esta etapa define el esquema inicial, pero todavía no incluye las vistas CRUD ni usuarios administradores.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. El CRUD de socios ya está disponible; los CRUD de entrenadores y planes y la creación de usuarios administradores quedan para sus etapas.
 
 ## Flujo de trabajo Git
 
@@ -156,8 +166,8 @@ Comprueba también que `.env` y otros archivos sensibles no aparezcan en el diff
 
 ```powershell
 git add <archivos-revisados>
-git commit -m "feat: configurar Flask-AppBuilder y MySQL"
-git push -u origin feature/configuracion-inicial
+git commit -m "feat: <descripción breve en español>"
+git push -u origin feature/<modulo>
 ```
 
 Después crea un Pull Request hacia `develop` y espera la revisión antes de integrar los cambios. No se realizan commits automáticamente.

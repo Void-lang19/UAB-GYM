@@ -17,6 +17,15 @@ def create_app() -> Flask:
     db.init_app(app)
     with app.app_context():
         appbuilder.init_app(app, db.session)
+        from app.views import SocioModelView
+
+        appbuilder.add_view(
+            SocioModelView,
+            "Socios",
+            icon="fa-users",
+            category="Gimnasio",
+            category_icon="fa-dumbbell",
+        )
 
     @app.cli.command("check-db")
     def check_db() -> None:
