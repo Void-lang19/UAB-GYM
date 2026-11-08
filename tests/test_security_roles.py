@@ -5,7 +5,7 @@ from flask_appbuilder.security.manager import AUTH_DB
 from flask_appbuilder.security.sqla.models import Role
 
 import app as app_module
-from app.security import ROLE_PERMISSIONS
+from app.security import MANAGED_VIEW_MENUS, ROLE_PERMISSIONS
 
 
 def permission_pairs(role: Role) -> set[tuple[str, str]]:
@@ -93,16 +93,7 @@ class SecurityRoleTests(unittest.TestCase):
                 actual_permissions = {
                     pair
                     for pair in permission_pairs(role)
-                    if pair[1]
-                    in {
-                        "Gimnasio",
-                        "Socios",
-                        "SocioModelView",
-                        "Entrenadores",
-                        "EntrenadorModelView",
-                        "Planes",
-                        "PlanModelView",
-                    }
+                    if pair[1] in MANAGED_VIEW_MENUS
                 }
                 self.assertEqual(actual_permissions, set(expected_permissions))
 

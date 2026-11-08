@@ -1,0 +1,6 @@
+{% extends "reportes/base.html" %}
+{% block alcance %}
+<p>Vigencia a <strong>{{ filtros.fecha_referencia.isoformat() }}</strong>. El día de vencimiento está incluido en la vigencia.</p>
+<p>Próximas a vencer: membresías vigentes que vencen entre esa fecha y los siguientes {{ filtros.dias_por_vencer }} días, inclusive. Son parte de las vigentes; no se suman nuevamente al total. Un contrato que vence ese día tiene 0 días restantes.</p>
+<p>Los intervalos «Inicio del contrato» y «Vencimiento» filtran sus respectivas fechas de forma independiente. Las canceladas se clasifican según su estado administrativo actual, incluso al consultar una fecha pasada.</p>
+{% endblock %}

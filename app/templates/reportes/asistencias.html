@@ -1,0 +1,5 @@
+{% extends "reportes/base.html" %}
+{% block alcance %}
+<p>El período se aplica a la fecha y hora de ingreso, incluyendo el día final completo. Se conserva la convención de asistencia en hora local de La Paz sin información de zona en la base.</p>
+<p>Las asistencias anuladas pueden consultarse en el detalle, pero se excluyen de los indicadores, la frecuencia por socio y el resumen diario. Cada entrada se cuenta una vez; registrar una salida no genera otra asistencia.</p>
+{% endblock %}

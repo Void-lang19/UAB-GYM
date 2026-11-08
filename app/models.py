@@ -140,22 +140,29 @@ class Membresia(db.Model):
 
     @hybrid_property
     def vigencia(self) -> str:
+        return self.vigencia_en(datetime.now(ZONA_LA_PAZ).date())
+
+    def vigencia_en(self, fecha_referencia: date) -> str:
+        """Clasificación del contrato en una fecha, sin modificar el registro."""
         if self.estado == "cancelada":
             return "cancelada"
-        hoy = datetime.now(ZONA_LA_PAZ).date()
-        if self.fecha_inicio > hoy:
+        if self.fecha_inicio > fecha_referencia:
             return "programada"
-        if self.fecha_fin < hoy:
+        if self.fecha_fin < fecha_referencia:
             return "vencida"
         return "vigente"
 
     @vigencia.expression
     def vigencia(cls):
-        hoy = datetime.now(ZONA_LA_PAZ).date()
+        return cls.expresion_vigencia(datetime.now(ZONA_LA_PAZ).date())
+
+    @classmethod
+    def expresion_vigencia(cls, fecha_referencia: date):
+        """Equivalente SQL de vigencia_en, reutilizado en consultas agrupadas."""
         return case(
             (cls.estado == "cancelada", "cancelada"),
-            (cls.fecha_inicio > hoy, "programada"),
-            (cls.fecha_fin < hoy, "vencida"),
+            (cls.fecha_inicio > fecha_referencia, "programada"),
+            (cls.fecha_fin < fecha_referencia, "vencida"),
             else_="vigente",
         )
 
