@@ -128,6 +128,12 @@ La sección **Gimnasio → Entrenadores** permite registrar, buscar, consultar y
 
 El borrado físico está deshabilitado; los entrenadores se pueden desactivar sin borrar su información. La lista y sus acciones requieren iniciar sesión.
 
+## CRUD de planes
+
+La sección **Gimnasio → Planes** permite registrar, buscar, consultar y editar planes por nombre, duración, precio, beneficios y estado. La duración se expresa en días y debe ser positiva; el precio puede ser cero, pero no negativo. Los nombres de plan son únicos.
+
+El borrado físico está deshabilitado; los planes pueden desactivarse para conservar la referencia de membresías. La lista y sus acciones requieren iniciar sesión.
+
 ### 7. Ejecutar las pruebas
 
 Con el entorno virtual activo:
@@ -147,11 +153,13 @@ UAB-GYM/
 │       ├── __init__.py
 │       ├── base.py       # Desactivación lógica compartida
 │       ├── entrenadores.py
+│       ├── planes.py
 │       └── socios.py     # Vistas CRUD, validaciones y desactivación lógica
 ├── tests/
 │   ├── test_config.py    # Pruebas de configuración
 │   ├── test_models.py    # Pruebas de tablas y restricciones
 │   ├── test_entrenador_view.py
+│   ├── test_plan_view.py
 │   └── test_socio_view.py # Pruebas de configuración del CRUD de socios
 ├── .env.example          # Plantilla sin credenciales reales
 ├── .gitignore
@@ -160,7 +168,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios y entrenadores ya están disponibles; el CRUD de planes y la creación de usuarios administradores quedan para sus etapas.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes ya están disponibles; la creación de usuarios administradores y la coordinación de roles quedan para sus etapas.
 
 ## Flujo de trabajo Git
 

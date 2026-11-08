@@ -17,7 +17,7 @@ def create_app() -> Flask:
     db.init_app(app)
     with app.app_context():
         appbuilder.init_app(app, db.session)
-        from app.views import EntrenadorModelView, SocioModelView
+        from app.views import EntrenadorModelView, PlanModelView, SocioModelView
 
         appbuilder.add_view(
             SocioModelView,
@@ -30,6 +30,12 @@ def create_app() -> Flask:
             EntrenadorModelView,
             "Entrenadores",
             icon="fa-user-tie",
+            category="Gimnasio",
+        )
+        appbuilder.add_view(
+            PlanModelView,
+            "Planes",
+            icon="fa-list-alt",
             category="Gimnasio",
         )
 
