@@ -56,4 +56,14 @@ def create_app() -> Flask:
             "Tablas creadas o ya existentes: socios, entrenadores y planes."
         )
 
+    @app.cli.command("configure-roles")
+    def configure_roles() -> None:
+        from app.security import configure_application_roles
+
+        configure_application_roles(appbuilder.sm)
+        click.echo(
+            "Roles Recepcionista y Entrenador configurados. "
+            "Admin y Public permanecen sin cambios."
+        )
+
     return app

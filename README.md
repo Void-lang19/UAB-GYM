@@ -144,7 +144,25 @@ Con el entorno virtual activo, MySQL iniciado y `.env` configurado, crea el prim
 flask --app app:create_app fab create-admin
 ```
 
-Responde las preguntas del asistente y escribe la contraseña en el prompt oculto; Flask-AppBuilder la almacenará con hash. No guardes esa contraseña en archivos ni en comandos. El rol `Admin` recibe los permisos administrativos. La asignación de permisos a `Recepcionista` y `Entrenador` queda pendiente de coordinación con el segundo integrante.
+Responde las preguntas del asistente y escribe la contraseña en el prompt oculto; Flask-AppBuilder la almacenará con hash. No guardes esa contraseña en archivos ni en comandos. El rol `Admin` recibe los permisos administrativos.
+
+El rol interno `Admin` corresponde al rol **ADMINISTRADOR** de la matriz y se conserva sin cambios. Después de crear el administrador, configura de forma idempotente los roles de aplicación:
+
+```powershell
+flask --app app:create_app configure-roles
+```
+
+El comando crea `Recepcionista` y `Entrenador` si no existen y solo sincroniza sus permisos sobre las vistas actuales; no modifica `Admin`, `Public`, usuarios ni permisos de otros módulos. Después, un administrador puede crear usuarios desde **Seguridad → Usuarios** y asignarles el rol correspondiente.
+
+| Rol | Socios | Entrenadores | Planes |
+|---|---|---|---|
+| ADMINISTRADOR (`Admin`) | Acceso administrativo completo; el borrado físico sigue deshabilitado | Acceso administrativo completo | Acceso administrativo completo |
+| Recepcionista | Listar, consultar, crear, editar y desactivar; sin borrado físico | Listar y consultar | Listar y consultar |
+| Entrenador | Sin acceso hasta que exista un filtro verificable por asignación | Sin acceso hasta que exista el vínculo con su perfil | Listar y consultar |
+
+El esquema actual aún no relaciona usuarios con entrenadores ni entrenadores con socios. Por ello, no se concede al rol `Entrenador` acceso a listados que expondrían registros ajenos. Sus vistas de socios, asistencias y reportes deben habilitarse al integrar la relación de asignación definida para membresías. Membresías, pagos, asistencias, reportes e IA todavía no están implementados ni reciben permisos en esta etapa.
+
+Las pruebas de autorización usan una base SQLite temporal y verifican acceso por URL directa, la conservación de permisos de `Admin`, el alcance limitado de cada rol y el cambio de rol al cerrar sesión.
 
 ### 7. Ejecutar las pruebas
 
@@ -159,7 +177,8 @@ python -m unittest discover -s tests -v
 ```text
 UAB-GYM/
 ├── app/
-│   ├── __init__.py       # Fábrica Flask-AppBuilder y comandos de base de datos
+│   ├── __init__.py       # Fábrica Flask-AppBuilder y comandos de aplicación
+│   ├── security.py       # Permisos de los roles Recepcionista y Entrenador
 │   ├── models.py         # Esquema inicial de socios, entrenadores y planes
 │   └── views/
 │       ├── __init__.py
@@ -172,6 +191,7 @@ UAB-GYM/
 │   ├── test_models.py    # Pruebas de tablas y restricciones
 │   ├── test_entrenador_view.py
 │   ├── test_plan_view.py
+│   ├── test_security_roles.py # Pruebas de autorización por rol
 │   └── test_socio_view.py # Pruebas de configuración del CRUD de socios
 ├── .env.example          # Plantilla sin credenciales reales
 ├── .gitignore
@@ -180,7 +200,7 @@ UAB-GYM/
 └── requirements.txt
 ```
 
-Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes ya están disponibles; la asignación de permisos a los roles Recepcionista y Entrenador queda pendiente de coordinación.
+Los planes guardan su duración como cantidad de días (`duracion_dias`). Los estados aceptados por la base son `activo` e `inactivo`. Los CRUD de socios, entrenadores y planes y los permisos iniciales de Recepcionista y Entrenador están disponibles. El filtrado de datos asignados y los permisos de módulos aún no implementados quedan pendientes de integrar con el segundo integrante.
 
 ## Flujo de trabajo Git
 
