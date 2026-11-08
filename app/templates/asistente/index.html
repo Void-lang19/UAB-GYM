@@ -1,0 +1,38 @@
+{% extends base_template %}
+{% block content %}
+{{ super() }}
+<main class="container-fluid">
+  <h1>Asistente IA del gimnasio</h1>
+  <div class="alert alert-info" role="note">
+    Pregunta por membresías y asistencias{% if not solo_membresias_y_asistencias %}, pagos e ingresos{% endif %}.
+    Se consultan indicadores agrupados; no se envían nombres, documentos, correos ni teléfonos al proveedor de IA.
+    La respuesta es informativa y no modifica registros.
+  </div>
+  <section class="panel panel-default" aria-label="Consulta al asistente">
+    <div class="panel-body">
+      <form method="post" action="{{ url_for('AsistenteView.index') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          <label for="pregunta">¿Qué quieres consultar?</label>
+          <textarea class="form-control" id="pregunta" name="pregunta" rows="3" maxlength="500"
+                    required placeholder="Ej.: ¿Cuántas asistencias hubo este mes?">{{ pregunta }}</textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Consultar</button>
+      </form>
+    </div>
+  </section>
+  {% if error %}<div class="alert alert-warning" role="alert">{{ error }}</div>{% endif %}
+  {% if respuesta %}
+  <section class="panel panel-success" aria-live="polite">
+    <div class="panel-heading"><h2 class="panel-title">Respuesta</h2></div>
+    <div class="panel-body"><p style="white-space: pre-line">{{ respuesta }}</p></div>
+  </section>
+  {% endif %}
+  <h2>Prueba con una pregunta</h2>
+  <ul>
+    <li>¿Cuántas membresías están vigentes ahora?</li>
+    <li>¿Cuántas asistencias hubo durante los últimos 30 días?</li>
+    {% if not solo_membresias_y_asistencias %}<li>¿Cuánto se recibió en pagos válidos este mes?</li>{% endif %}
+  </ul>
+</main>
+{% endblock %}

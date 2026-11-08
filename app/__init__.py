@@ -21,6 +21,7 @@ def create_app() -> Flask:
             AsistenciaModelView, EntrenadorModelView, MembresiaModelView,
             PagoModelView, PlanModelView, SocioModelView,
             ReporteAsistenciasView, ReporteMembresiasView, ReportePagosView,
+            AsistenteView,
         )
 
         appbuilder.add_view(
@@ -56,6 +57,9 @@ def create_app() -> Flask:
         appbuilder.add_view(
             ReporteAsistenciasView, "Reporte de asistencias",
             icon="fa-calendar-check-o", category="Reportes",
+        )
+        appbuilder.add_view(
+            AsistenteView, "Asistente IA", icon="fa-comments", category="Reportes",
         )
 
     @app.cli.command("check-db")

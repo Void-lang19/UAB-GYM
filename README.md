@@ -88,7 +88,7 @@ Edita `.env` y reemplaza `SECRET_KEY` por una clave aleatoria generada con:
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
+Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. Para usar el asistente IA, configura también `OPENAI_API_KEY`; `OPENAI_MODEL` es opcional. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
 
 ### 6. Crear las tablas iniciales, comprobar la conexión y ejecutar
 
@@ -338,18 +338,26 @@ Se utilizan encabezados españoles, codificación `utf-8-sig` (BOM), separador `
 
 Los textos que podrían interpretarse como fórmulas (`=`, `+`, `-`, `@`, tabulaciones o saltos de línea, incluso después de espacios) se prefijan con apóstrofo solo al exportarlos. Los datos originales no cambian. Las filas se recorren por lotes y el archivo se prepara en almacenamiento temporal, volcando a disco cuando supera 1 MiB; así no se cargan todos los registros en memoria y se detectan fallos antes de iniciar la descarga.
 
+## Asistente IA
+
+La pantalla **Reportes → Asistente IA** (`/asistente/`) permite preguntar en español por indicadores de membresías y asistencias. Admin también puede preguntar por pagos e ingresos; Recepcionista no consulta ni envía cifras financieras mediante el asistente. Entrenador no tiene acceso.
+
+El backend obtiene los agregados con las consultas SQL de los reportes y envía a OpenAI únicamente totales e indicadores de contexto histórico, mes actual y últimos 30 días. No envía filas, nombres, documentos, teléfonos, correos ni referencias de pago. La IA redacta la respuesta, no ejecuta SQL, no decide filtros de acceso y no puede modificar datos. La integración usa la Responses API de OpenAI.
+
+Para activarlo, configura `OPENAI_API_KEY` en `.env` o en el entorno del servidor. `OPENAI_MODEL` es opcional y por defecto usa `gpt-6-luna`. La clave no se guarda en el repositorio; sin ella, la aplicación inicia normalmente y la pantalla informa que falta configurar el asistente. Cada consulta requiere conexión a OpenAI y puede generar cargos según la cuenta y el modelo.
+
 ### Organización y pruebas pendientes
 
 `app/services_reportes.py` reúne las selecciones, agregaciones y paginación SQL. `app/reportes_filtros.py` valida parámetros y `app/reportes_csv.py` formatea archivos. `app/views/reportes.py` define tres vistas de solo lectura, registradas por `appbuilder`; las plantillas de `app/templates/reportes/` reutilizan un diseño común. Esta organización sigue las [vistas protegidas BaseView de Flask-AppBuilder](https://flask-appbuilder.readthedocs.io/en/latest/views.html).
 
-Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py` y `test_reportes_security.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, accesos por URL, errores y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
+Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py`, `test_reportes_security.py` y `test_asistente.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, acceso del asistente por rol, envío solo de agregados y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
 
-**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 59 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB aún deben comprobarse en el entorno que tenga XAMPP:
+**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 63 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB aún deben comprobarse en el entorno que tenga XAMPP:
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-Queda verificar las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios) y la apertura de los CSV en Excel en el equipo de despliegue. Los reportes no requieren migraciones ni nuevas dependencias.
+Queda verificar las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios) y la apertura de los CSV en Excel en el equipo de despliegue. Los reportes no requieren migraciones; el asistente añade el SDK de OpenAI como dependencia.
 
 La inicialización de las vistas excluye las propiedades híbridas de los campos de búsqueda de Flask-AppBuilder, que solo admite columnas mapeadas en ese formulario. La validación de pagos nuevos considera `estado=None` como válido, igual que el valor predeterminado aplicado al insertar.

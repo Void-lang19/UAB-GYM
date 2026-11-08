@@ -1,5 +1,6 @@
 from app.views.entrenadores import EntrenadorModelView
 from app.views.asistencias import AsistenciaModelView
+from app.views.asistente import AsistenteView
 from app.views.membresias import MembresiaModelView
 from app.views.pagos import PagoModelView
 from app.views.planes import PlanModelView
@@ -7,7 +8,7 @@ from app.views.socios import SocioModelView
 from app.views.reportes import ReporteAsistenciasView, ReporteMembresiasView, ReportePagosView
 
 __all__ = [
-    "AsistenciaModelView", "EntrenadorModelView", "MembresiaModelView",
+    "AsistenciaModelView", "AsistenteView", "EntrenadorModelView", "MembresiaModelView",
     "PagoModelView", "PlanModelView", "SocioModelView",
     "ReporteAsistenciasView", "ReporteMembresiasView", "ReportePagosView",
 ]

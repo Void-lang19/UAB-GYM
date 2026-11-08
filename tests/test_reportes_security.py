@@ -74,6 +74,9 @@ class ReportesSecurityTests(unittest.TestCase):
 
     def test_admin_accede_a_tres_pantallas_y_tres_exportaciones(self):
         cliente = self.cliente("Admin")
+        asistente = cliente.get("/asistente/")
+        self.assertEqual(asistente.status_code, 200)
+        self.assertIn("no-store", asistente.headers["Cache-Control"])
         for tipo in ("membresias", "pagos", "asistencias"):
             with self.subTest(tipo=tipo):
                 respuesta = cliente.get(f"/reportes/{tipo}/")
@@ -88,6 +91,17 @@ class ReportesSecurityTests(unittest.TestCase):
 
     def test_recepcionista_solo_membresias_y_asistencias(self):
         cliente = self.cliente("Recepcionista")
+        asistente = cliente.get("/asistente/")
+        self.assertEqual(asistente.status_code, 200)
+        with (
+            patch("app.views.asistente.construir_contexto", return_value={"asistencias": {}}) as contexto,
+            patch("app.views.asistente.responder_pregunta", return_value="Respuesta de prueba") as responder,
+        ):
+            respuesta = cliente.post("/asistente/", data={"pregunta": "¿Cuántas asistencias?"})
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn(b"Respuesta de prueba", respuesta.data)
+        contexto.assert_called_once_with(administrador=False)
+        responder.assert_called_once()
         for tipo in ("membresias", "asistencias"):
             for sufijo in ("", "exportar.csv"):
                 respuesta = cliente.get(f"/reportes/{tipo}/{sufijo}")
@@ -103,6 +117,7 @@ class ReportesSecurityTests(unittest.TestCase):
                 for sufijo in ("", "exportar.csv"):
                     with self.subTest(rol=rol, tipo=tipo, sufijo=sufijo):
                         self.assert_denegado(cliente.get(f"/reportes/{tipo}/{sufijo}"))
+            self.assert_denegado(cliente.get("/asistente/"))
 
     def test_exportacion_y_pantalla_comparten_permiso(self):
         with self.app.app_context():
