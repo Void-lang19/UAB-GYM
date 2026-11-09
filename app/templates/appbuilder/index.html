@@ -1,0 +1,35 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<main class="uab-dashboard">
+  <section class="uab-welcome">
+    <div>
+      <p class="uab-eyebrow">UNIVERSIDAD ADVENTISTA DE BOLIVIA</p>
+      <h1>Administración del gimnasio</h1>
+      <p>Gestiona las operaciones diarias y consulta la información disponible para tu perfil.</p>
+    </div>
+    <div class="uab-welcome-mark" aria-hidden="true"><i class="fa fa-dumbbell"></i></div>
+  </section>
+  <section class="uab-menu-grid" aria-label="Módulos disponibles">
+    {% for categoria in appbuilder.menu.get_list() %}
+      {% if categoria.childs and categoria|is_menu_visible %}
+        <article class="uab-menu-card">
+          <div class="uab-menu-card-heading">
+            <span class="uab-card-icon"><i class="fa {{ categoria.icon or 'fa-th-large' }}" aria-hidden="true"></i></span>
+            <h2>{{ _(categoria.label) }}</h2>
+          </div>
+          <ul>
+            {% for elemento in categoria.childs %}
+              {% if elemento and elemento.name != '-' and elemento|is_menu_visible %}
+                <li><a href="{{ elemento.get_url() }}">
+                  <span>{{ _(elemento.label) }}</span><i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
+    {% endfor %}
+  </section>
+  <p class="uab-dashboard-note">Los módulos visibles dependen de los permisos asignados a tu cuenta.</p>
+</main>
+{% endblock %}

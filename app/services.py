@@ -20,10 +20,17 @@ def hora_local() -> datetime:
 
 def preparar_membresia(membresia: Membresia, *, excluir_id: int | None = None) -> None:
     existente = db.session.get(Membresia, excluir_id) if excluir_id is not None else None
-    socio = db.session.execute(
-        db.select(Socio).where(Socio.id == membresia.socio_id).with_for_update()
-    ).scalar_one_or_none()
-    plan = db.session.get(Plan, membresia.plan_id)
+    # En formularios de Flask-AppBuilder se puede asignar primero la relación
+    # (membresia.socio / membresia.plan); SQLAlchemy sincroniza las FK al hacer
+    # flush, por lo que socio_id y plan_id todavía pueden ser None aquí.
+    socio_id = membresia.socio_id or getattr(membresia.socio, "id", None)
+    socio = None
+    if socio_id is not None:
+        socio = db.session.execute(
+            db.select(Socio).where(Socio.id == socio_id).with_for_update()
+        ).scalar_one_or_none()
+    plan_id = membresia.plan_id or getattr(membresia.plan, "id", None)
+    plan = db.session.get(Plan, plan_id) if plan_id is not None else None
     if socio is None:
         raise ValueError("El socio seleccionado no existe.")
     if socio.estado != "activo":
@@ -35,6 +42,10 @@ def preparar_membresia(membresia: Membresia, *, excluir_id: int | None = None) -
     if not membresia.fecha_inicio:
         raise ValueError("La fecha de inicio es obligatoria.")
 
+    # Deja las claves explícitas para que las validaciones y consultas siguientes
+    # funcionen antes del flush del formulario.
+    membresia.socio_id = socio.id
+    membresia.plan_id = plan.id
     membresia.fecha_fin = membresia.fecha_inicio + timedelta(days=plan.duracion_dias - 1)
     historial_plan = inspect(membresia).attrs.plan_id.history.deleted
     plan_modificado = bool(historial_plan and historial_plan[0] != plan.id)
@@ -86,11 +97,15 @@ def total_pagado(membresia_id: int, *, excluir_pago_id: int | None = None) -> De
 
 
 def validar_pago(pago: Pago, *, excluir_pago_id: int | None = None) -> None:
-    membresia = db.session.execute(
-        db.select(Membresia).where(Membresia.id == pago.membresia_id).with_for_update()
-    ).scalar_one_or_none()
+    membresia_id = pago.membresia_id or getattr(pago.membresia, "id", None)
+    membresia = None
+    if membresia_id is not None:
+        membresia = db.session.execute(
+            db.select(Membresia).where(Membresia.id == membresia_id).with_for_update()
+        ).scalar_one_or_none()
     if membresia is None:
         raise ValueError("La membresía seleccionada no existe.")
+    pago.membresia_id = membresia.id
     try:
         monto = Decimal(str(pago.monto))
     except (InvalidOperation, TypeError):
@@ -161,10 +176,22 @@ def registrar_salida(asistencia: Asistencia, *, cuando: datetime | None = None) 
 
 
 def validar_asistencia(asistencia: Asistencia, *, excluir_id: int | None = None) -> None:
-    socio = db.session.execute(db.select(Socio).where(Socio.id == asistencia.socio_id).with_for_update()).scalar_one_or_none()
-    membresia = db.session.execute(db.select(Membresia).where(Membresia.id == asistencia.membresia_id).with_for_update()).scalar_one_or_none()
+    socio_id = asistencia.socio_id or getattr(asistencia.socio, "id", None)
+    membresia_id = asistencia.membresia_id or getattr(asistencia.membresia, "id", None)
+    socio = None
+    if socio_id is not None:
+        socio = db.session.execute(
+            db.select(Socio).where(Socio.id == socio_id).with_for_update()
+        ).scalar_one_or_none()
+    membresia = None
+    if membresia_id is not None:
+        membresia = db.session.execute(
+            db.select(Membresia).where(Membresia.id == membresia_id).with_for_update()
+        ).scalar_one_or_none()
     if socio is None or membresia is None:
         raise ValueError("Selecciona un socio y una membresía existentes.")
+    asistencia.socio_id = socio.id
+    asistencia.membresia_id = membresia.id
     if membresia.socio_id != socio.id:
         raise ValueError("La membresía seleccionada no pertenece al socio.")
     instante = asistencia.fecha_hora_entrada or hora_local()

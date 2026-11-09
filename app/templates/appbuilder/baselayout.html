@@ -1,0 +1,28 @@
+{% extends 'appbuilder/init.html' %}
+{% import 'appbuilder/baselib.html' as baselib %}
+
+{% block head_css %}
+  {{ super() }}
+  <link href="{{ url_for('static', filename='css/uab-gym.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+  {% include 'appbuilder/general/confirm.html' %}
+  {% include 'appbuilder/general/alert.html' %}
+  {% block navbar %}
+    <header class="top" role="header">
+      {% include 'appbuilder/navbar.html' %}
+    </header>
+  {% endblock %}
+  <div class="container uab-page-container">
+    <div class="row">
+      {% block messages %}{% include 'appbuilder/flash.html' %}{% endblock %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  {% block footer %}
+    <footer class="uab-footer">
+      <div class="container">UAB GYM <span>· Administración del gimnasio</span></div>
+    </footer>
+  {% endblock %}
+{% endblock %}
