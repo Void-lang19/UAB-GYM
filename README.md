@@ -92,7 +92,7 @@ Edita `.env` y reemplaza `SECRET_KEY` por una clave aleatoria generada con:
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. Para usar el asistente IA, configura también `OPENAI_API_KEY`; `OPENAI_MODEL` es opcional. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
+Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. El asistente puede usar Ollama local (sin clave de API) u OpenAI; sus variables se detallan en la sección **Asistente IA**. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
 
 ### 6. Crear las tablas iniciales, comprobar la conexión y ejecutar
 
@@ -354,9 +354,26 @@ Los textos que podrían interpretarse como fórmulas (`=`, `+`, `-`, `@`, tabula
 
 La pantalla **Reportes → Asistente IA** (`/asistente/`) permite preguntar en español por indicadores de membresías y asistencias. Admin también puede preguntar por pagos e ingresos; Recepcionista no consulta ni envía cifras financieras mediante el asistente. Entrenador no tiene acceso.
 
-El backend obtiene los agregados con las consultas SQL de los reportes y envía a OpenAI únicamente totales e indicadores de contexto histórico, mes actual y últimos 30 días. No envía filas, nombres, documentos, teléfonos, correos ni referencias de pago. La IA redacta la respuesta, no ejecuta SQL, no decide filtros de acceso y no puede modificar datos. La integración usa la Responses API de OpenAI.
+El backend obtiene los agregados con las consultas SQL de los reportes y comparte con el proveedor configurado (OpenAI u Ollama) únicamente totales e indicadores de contexto histórico, mes actual y últimos 30 días. No comparte filas, nombres, documentos, teléfonos, correos ni referencias de pago. Con Ollama, el modelo se ejecuta en el equipo local. La IA redacta la respuesta, no ejecuta SQL, no decide filtros de acceso y no puede modificar datos. La integración usa el SDK de OpenAI y su API Responses compatible con Ollama.
 
-Para activarlo, configura `OPENAI_API_KEY` en `.env` o en el entorno del servidor. `OPENAI_MODEL` es opcional y por defecto usa `gpt-6-luna`. La clave no se guarda en el repositorio; sin ella, la aplicación inicia normalmente y la pantalla informa que falta configurar el asistente. Cada consulta requiere conexión a OpenAI y puede generar cargos según la cuenta y el modelo.
+El asistente admite dos proveedores. **Ollama local** es la opción recomendada para probar sin pagar por solicitudes y mantenerlas en el equipo. Descarga e instala Ollama desde [ollama.com/download/windows](https://ollama.com/download/windows), abre PowerShell y descarga un modelo pequeño compatible con español:
+
+```powershell
+ollama pull llama3.2:3b
+ollama run llama3.2:3b
+```
+
+Deja Ollama ejecutándose y configura estas variables en `.env`:
+
+```dotenv
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
+OLLAMA_MODEL=llama3.2:3b
+```
+
+La aplicación se conecta al endpoint local compatible con OpenAI; no necesita `OPENAI_API_KEY` para Ollama. La documentación oficial de Ollama describe su API local compatible con Responses en `http://localhost:11434/v1/`.
+
+Para volver a OpenAI, usa `AI_PROVIDER=openai`, configura `OPENAI_API_KEY` y, de forma opcional, `OPENAI_MODEL`. También existe una cuota gratuita limitada para algunos modelos en Gemini API; revisa las condiciones y privacidad actuales antes de enviar datos. Con el proveedor local, las respuestas dependen de la memoria y el rendimiento del equipo.
 
 ### Organización y pruebas pendientes
 

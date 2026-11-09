@@ -96,6 +96,8 @@ label { color: #35425C; font-weight: 600; }
 .uab-login-form .btn { margin-top: 8px; min-height: 47px; }
 .uab-login-form .btn i { margin-left: 8px; }
 .uab-login-help { font-size: 12px; line-height: 1.6; margin-top: 23px; text-align: center; }
+.uab-asistente-respuesta { border-left: 4px solid var(--uab-blue); border-radius: 0 0 8px 8px; }
+.uab-asistente-respuesta p { color: var(--uab-ink); font-size: 16px; line-height: 1.75; margin: 0; white-space: pre-line; }
 
 @media (max-width: 767px) {
   .navbar { margin-bottom: 18px; }

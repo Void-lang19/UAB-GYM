@@ -41,8 +41,8 @@ class AsistenteView(BaseView):
                 try:
                     contexto = construir_contexto(administrador=administrador)
                     respuesta = responder_pregunta(pregunta, contexto)
-                except AsistenteNoConfigurado:
-                    error = "El asistente todavía no está configurado. Configura OPENAI_API_KEY en el entorno del servidor."
+                except AsistenteNoConfigurado as exc:
+                    error = str(exc)
                 except Exception as exc:
                     current_app.logger.error(
                         "Falló la consulta al asistente IA (%s).", type(exc).__name__,
