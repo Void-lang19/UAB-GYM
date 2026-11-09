@@ -1,0 +1,6 @@
+{% extends "reportes/base.html" %}
+{% block alcance %}
+<p>El período incluye días completos de La Paz y se aplica a la fecha del pago. Las horas UTC de los pagos se presentan en hora local. «Pagos anulados» usa la fecha original del pago, no la fecha de anulación.</p>
+<p>Los ingresos y las distribuciones incluyen únicamente pagos válidos y sus importes efectivamente recibidos. Cancelar una membresía no anula sus pagos históricos.</p>
+<p><strong>Saldo pendiente actual:</strong> precio pactado menos todos los pagos válidos de las {{ indicadores.membresias_saldo }} membresías que coinciden con socio y plan, incluidas las canceladas y las que no tienen pagos. Los filtros de fecha, método y estado del pago no se aplican a este saldo. Es una obligación pendiente; no se suma a los ingresos.</p>
+{% endblock %}

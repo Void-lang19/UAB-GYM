@@ -1,0 +1,91 @@
+{% extends base_template %}
+
+{% macro tabla(titulo_tabla, columnas_tabla, datos, clave_pagina) %}
+<section class="panel panel-default">
+  <div class="panel-heading"><h2 class="panel-title">{{ titulo_tabla }}</h2></div>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+      <caption class="sr-only">{{ titulo_tabla }}</caption>
+      <thead><tr>{% for clave, etiqueta in columnas_tabla %}<th scope="col">{{ etiqueta }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for fila in datos.filas %}
+        <tr>{% for clave, etiqueta in columnas_tabla %}
+          <td{% if fila[clave] is number %} class="text-right"{% endif %}>{{ formatear(fila[clave]) if fila[clave] is not none else '—' }}</td>
+        {% endfor %}</tr>
+      {% else %}
+        <tr><td colspan="{{ columnas_tabla|length }}" class="text-center">No se encontraron registros para los filtros seleccionados</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if clave_pagina %}
+  <div class="panel-footer">
+    <nav aria-label="Paginación de {{ titulo_tabla }}">
+      <span>Página {{ datos.numero }} de {{ datos.paginas }} · {{ datos.total }} registros</span>
+      {% if datos.numero > 1 %}
+        <a class="btn btn-default btn-sm" href="{{ enlace_pagina(clave_pagina, 1) }}">Primera</a>
+        <a class="btn btn-default btn-sm" href="{{ enlace_pagina(clave_pagina, datos.numero - 1) }}">Anterior</a>
+      {% endif %}
+      {% if datos.numero < datos.paginas %}
+        <a class="btn btn-default btn-sm" href="{{ enlace_pagina(clave_pagina, datos.numero + 1) }}">Siguiente</a>
+        <a class="btn btn-default btn-sm" href="{{ enlace_pagina(clave_pagina, datos.paginas) }}">Última</a>
+      {% endif %}
+    </nav>
+  </div>
+  {% endif %}
+</section>
+{% endmacro %}
+
+{% block content %}
+{{ super() }}
+<main class="container-fluid">
+  <h1>{{ titulo }}</h1>
+  <section class="panel panel-default" aria-label="Filtros del reporte">
+    <div class="panel-heading"><h2 class="panel-title">Filtros</h2></div>
+    <div class="panel-body">
+      <form method="get" action="{{ url_limpiar }}">
+        <div class="row">
+          {% for nombre, etiqueta, tipo, opciones in campos %}
+          <div class="col-sm-6 col-md-3 form-group">
+            <label for="{{ nombre }}">{{ etiqueta }}</label>
+            {% if tipo == 'select' %}
+            <select class="form-control" id="{{ nombre }}" name="{{ nombre }}">
+              {% if nombre != 'por_pagina' %}<option value="">Todos</option>{% endif %}
+              {% for valor, texto in opciones %}
+              <option value="{{ valor }}"{% if valores.get(nombre, '') == valor %} selected{% endif %}>{{ texto }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <input class="form-control" type="{{ tipo }}" id="{{ nombre }}" name="{{ nombre }}"
+                   value="{{ valores.get(nombre, '') }}"
+                   {% if tipo == 'text' %}maxlength="100"{% endif %}
+                   {% if tipo == 'number' %}step="1" min="{{ 0 if nombre == 'dias_por_vencer' else 1 }}" max="{{ 365 if nombre == 'dias_por_vencer' else 2147483647 }}"{% endif %}
+                   {% if tipo == 'date' %}min="1900-01-01" max="9998-12-31"{% endif %}>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+        <a class="btn btn-default" href="{{ url_limpiar }}">Limpiar filtros</a>
+      </form>
+    </div>
+  </section>
+  <div class="alert alert-info" role="note">{% block alcance %}{% endblock %}</div>
+  <section class="row" aria-label="Indicadores del reporte">
+    {% for clave, etiqueta in etiquetas %}
+    <div class="col-sm-6 col-md-3">
+      <div class="panel panel-default">
+        <div class="panel-body"><div>{{ etiqueta }}</div><strong class="h3">{{ formatear(indicadores[clave]) }}</strong></div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+  <p>Los indicadores y resúmenes incluyen todos los registros que cumplen los filtros, no solo esta página.</p>
+  {% for resumen in resumenes %}
+    {{ tabla(resumen.titulo, resumen.columnas, resumen.pagina, resumen.clave_pagina) }}
+  {% endfor %}
+  <p><a class="btn btn-success" href="{{ url_csv }}"><span class="fa fa-download" aria-hidden="true"></span> Exportar detalle CSV</a></p>
+  <p class="text-muted">La descarga incluye todas las páginas del detalle con estos filtros.</p>
+  {{ tabla('Detalle', columnas, pagina, 'pagina') }}
+</main>
+{% endblock %}

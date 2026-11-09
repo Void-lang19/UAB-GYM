@@ -1,0 +1,9 @@
+{% extends base_template %}
+{% block content %}
+{{ super() }}
+<div class="container-fluid">
+  <h1>{{ titulo }}</h1>
+  <div class="alert alert-danger" role="alert">{{ mensaje }}</div>
+  <a class="btn btn-default" href="{{ volver }}">Volver al reporte sin filtros</a>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@ from flask_appbuilder.security.manager import AUTH_DB
 from flask_appbuilder.security.sqla.models import Role
 
 import app as app_module
-from app.security import ROLE_PERMISSIONS
+from app.security import MANAGED_VIEW_MENUS, ROLE_PERMISSIONS
 
 
 def permission_pairs(role: Role) -> set[tuple[str, str]]:
@@ -93,16 +93,7 @@ class SecurityRoleTests(unittest.TestCase):
                 actual_permissions = {
                     pair
                     for pair in permission_pairs(role)
-                    if pair[1]
-                    in {
-                        "Gimnasio",
-                        "Socios",
-                        "SocioModelView",
-                        "Entrenadores",
-                        "EntrenadorModelView",
-                        "Planes",
-                        "PlanModelView",
-                    }
+                    if pair[1] in MANAGED_VIEW_MENUS
                 }
                 self.assertEqual(actual_permissions, set(expected_permissions))
 
@@ -124,11 +115,17 @@ class SecurityRoleTests(unittest.TestCase):
             "/socios/add",
             "/entrenadores/list/",
             "/planes/list/",
+            "/membresias/list/",
+            "/membresias/add",
+            "/pagos/list/",
+            "/pagos/add",
+            "/asistencias/list/",
+            "/asistencias/add",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 200)
 
-        for path in ("/entrenadores/add", "/planes/add", "/socios/download/csv"):
+        for path in ("/entrenadores/add", "/planes/add", "/socios/download/csv", "/pagos/edit/1", "/asistencias/edit/1"):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 403)
 
@@ -149,6 +146,9 @@ class SecurityRoleTests(unittest.TestCase):
             "/entrenadores/list/",
             "/entrenadores/add",
             "/planes/add",
+            "/membresias/add",
+            "/pagos/add",
+            "/asistencias/add",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 403)
@@ -165,6 +165,9 @@ class SecurityRoleTests(unittest.TestCase):
             "/socios/add",
             "/entrenadores/add",
             "/planes/add",
+            "/membresias/list/",
+            "/pagos/list/",
+            "/asistencias/list/",
         ):
             with self.subTest(path=path):
                 self.assertEqual(client.get(path).status_code, 200)
