@@ -15,6 +15,10 @@ Construir una aplicación administrativa modular para gestionar socios, entrenad
 - PyMySQL como controlador de MySQL.
 - Git y GitHub.
 
+## Interfaz
+
+La interfaz usa español latinoamericano y una paleta institucional azul y blanca: `#0474C4`, `#5379AE`, `#FFFFFF`, `#A8C4EC`, `#06457F` y `#262B40`. El tema se aplica a las pantallas administrativas generadas por Flask-AppBuilder, los reportes y el asistente. El acceso tiene un diseño propio y el inicio muestra únicamente los módulos permitidos para la cuenta, en un diseño adaptable a móviles.
+
 ## Requisitos previos
 
 1. Instala Python desde [python.org](https://www.python.org/downloads/windows/) y habilita **Add Python to PATH** durante la instalación. Comprueba la instalación en PowerShell:
@@ -99,6 +103,14 @@ flask --app app:create_app init-db
 ```
 
 El comando crea las tablas de socios, entrenadores, planes, membresías, pagos y asistencias si todavía no existen; no elimina ni reinicia tablas. Flask-AppBuilder también administra sus tablas internas de seguridad. Los reportes consultan estas tablas y no necesitan tablas adicionales.
+
+Para cargar registros ficticios de prueba en cada módulo:
+
+```powershell
+flask --app app:create_app seed-demo
+```
+
+Agrega 3 socios, 2 entrenadores, 3 planes, 3 membresías, 4 pagos y 3 asistencias con datos de ejemplo sin etiquetas de demostración en las pantallas. Son datos ficticios para el prototipo; no corresponden a personas ni transacciones reales. La carga no reemplaza otros registros y se puede volver a ejecutar sin duplicar los ejemplos. Úsala solo en una base de desarrollo.
 
 Verifica la conexión a `uab_gym`:
 
@@ -344,7 +356,7 @@ Los textos que podrían interpretarse como fórmulas (`=`, `+`, `-`, `@`, tabula
 
 Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py` y `test_reportes_security.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, accesos por URL, errores y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
 
-**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 59 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB aún deben comprobarse en el entorno que tenga XAMPP:
+**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 61 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas y del tema, traducciones al español, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB se verificaron en MariaDB 10.11.16 local:
 
 ```powershell
 python -m unittest discover -s tests -v

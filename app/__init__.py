@@ -1,5 +1,5 @@
 import click
-from flask import Flask
+from flask import Flask, session
 from flask_appbuilder import AppBuilder
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
@@ -13,6 +13,13 @@ appbuilder = AppBuilder()
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_mapping(load_config())
+
+    @app.before_request
+    def use_supported_locale() -> None:
+        idiomas = app.config["LANGUAGES"]
+        idioma_predeterminado = app.config["BABEL_DEFAULT_LOCALE"]
+        if session.get("locale") not in idiomas:
+            session["locale"] = idioma_predeterminado
 
     db.init_app(app)
     with app.app_context():
@@ -82,5 +89,16 @@ def create_app() -> Flask:
             "Roles Recepcionista y Entrenador configurados. "
             "Admin y Public permanecen sin cambios."
         )
+
+    @app.cli.command("seed-demo")
+    def seed_demo() -> None:
+        """Carga datos de ejemplo del prototipo sin duplicarlos."""
+        from app.seed_demo import cargar_datos_demo
+
+        creados = cargar_datos_demo()
+        click.echo("Datos de ejemplo agregados (solo se muestran cantidades):")
+        for entidad, cantidad in creados.items():
+            click.echo(f"  {entidad}: {cantidad}")
+        click.echo("La carga es repetible y no reemplaza registros existentes.")
 
     return app

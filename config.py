@@ -39,6 +39,14 @@ def load_config() -> dict[str, object]:
     )
 
     return {
+        "APP_NAME": "UAB GYM",
+        "APP_THEME": "",
+        "BABEL_DEFAULT_LOCALE": "es",
+        "BABEL_DEFAULT_TIMEZONE": "America/La_Paz",
+        "LANGUAGES": {"es": {"flag": "es", "name": "Español (Latinoamérica)"}},
+        "BABEL_TRANSLATION_DIRECTORIES": os.path.join(
+            os.path.dirname(__file__), "app", "translations",
+        ),
         "SECRET_KEY": secret_key,
         "SQLALCHEMY_DATABASE_URI": database_url,
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,

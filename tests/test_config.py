@@ -65,6 +65,9 @@ class LoadConfigTests(unittest.TestCase):
             config = load_config()
 
         self.assertEqual(config["AUTH_TYPE"], AUTH_DB)
+        self.assertEqual(config["BABEL_DEFAULT_LOCALE"], "es")
+        self.assertEqual(config["BABEL_DEFAULT_TIMEZONE"], "America/La_Paz")
+        self.assertEqual(config["LANGUAGES"]["es"]["name"], "Español (Latinoamérica)")
         self.assertEqual(config["AUTH_ROLE_ADMIN"], "Admin")
         self.assertFalse(config["AUTH_USER_REGISTRATION"])
         self.assertFalse(config["AUTH_ROLES_SYNC_AT_LOGIN"])

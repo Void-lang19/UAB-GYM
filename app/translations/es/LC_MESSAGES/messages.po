@@ -1,0 +1,56 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: UAB GYM\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Add"
+msgstr "Agregar"
+
+msgid "List"
+msgstr "Listado"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Show"
+msgstr "Ver"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Update"
+msgstr "Actualizar"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Export"
+msgstr "Exportar"
+
+msgid "Import"
+msgstr "Importar"
+
+msgid "New"
+msgstr "Nuevo"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "First"
+msgstr "Primero"
+
+msgid "Last"
+msgstr "Último"
