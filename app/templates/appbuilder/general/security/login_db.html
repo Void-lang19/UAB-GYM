@@ -1,0 +1,40 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<main class="uab-login-shell">
+  <section class="uab-login-story">
+    <div class="uab-login-brand">
+      <span class="uab-brand-symbol"><i class="fa fa-dumbbell" aria-hidden="true"></i></span>
+      <span>UAB <strong>GYM</strong></span>
+    </div>
+    <div class="uab-login-message">
+      <p class="uab-eyebrow">UNIVERSIDAD ADVENTISTA DE BOLIVIA</p>
+      <h1>Tu gimnasio,<br>mejor organizado.</h1>
+      <p>Administra socios, membresías, pagos y asistencia desde un solo lugar.</p>
+    </div>
+    <div class="uab-login-decoration" aria-hidden="true"><i class="fa fa-bolt"></i></div>
+    <p class="uab-login-location">Vinto · Cochabamba · Bolivia</p>
+  </section>
+  <section class="uab-login-form-side">
+    <div class="uab-login-card">
+      <p class="uab-eyebrow">PANEL ADMINISTRATIVO</p>
+      <h2>Inicia sesión</h2>
+      <p class="uab-login-subtitle">Ingresa con tu cuenta institucional.</p>
+      <form class="uab-login-form" action="" method="post" name="login">
+        {{ form.hidden_tag() }}
+        <div class="form-group{% if form.errors.username is defined %} has-error{% endif %}">
+          <label for="username">Usuario</label>
+          <div class="uab-input-wrap"><i class="fa fa-user" aria-hidden="true"></i>{{ form.username(id="username", class="form-control", autocomplete="username", autofocus=true, placeholder="Tu usuario") }}</div>
+          {% for error in form.errors.get('username', []) %}<span class="help-block">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group{% if form.errors.password is defined %} has-error{% endif %}">
+          <label for="password">Contraseña</label>
+          <div class="uab-input-wrap"><i class="fa fa-lock" aria-hidden="true"></i>{{ form.password(id="password", class="form-control", autocomplete="current-password", placeholder="Tu contraseña") }}</div>
+          {% for error in form.errors.get('password', []) %}<span class="help-block">{{ error }}</span>{% endfor %}
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Entrar al sistema <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+      </form>
+      <p class="uab-login-help">¿Problemas para ingresar? Comunícate con el administrador del gimnasio.</p>
+    </div>
+  </section>
+</main>
+{% endblock %}

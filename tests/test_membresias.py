@@ -37,6 +37,19 @@ class MembresiaServiceTests(unittest.TestCase):
         self.assertEqual(membresia.fecha_fin, date(2026, 11, 30))
         self.assertEqual(membresia.precio_pactado, Decimal("200.00"))
 
+    def test_prepara_membresia_con_relaciones_asignadas_por_el_formulario(self):
+        membresia = Membresia(
+            socio=self.socio,
+            plan=self.plan,
+            fecha_inicio=date.today(),
+        )
+
+        preparar_membresia(membresia)
+
+        self.assertEqual(membresia.socio_id, self.socio.id)
+        self.assertEqual(membresia.plan_id, self.plan.id)
+        self.assertEqual(membresia.precio_pactado, self.plan.precio)
+
     def test_rechaza_socios_inactivos_y_periodos_superpuestos(self):
         existente = Membresia(socio_id=self.socio.id, plan_id=self.plan.id, fecha_inicio=date.today())
         preparar_membresia(existente)

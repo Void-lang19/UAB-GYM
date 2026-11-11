@@ -38,6 +38,13 @@ class PagoServiceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "supera"):
             validar_pago(Pago(membresia_id=self.membresia.id, monto=Decimal("50.01"), metodo_pago="QR"))
 
+    def test_valida_pago_con_membresia_asignada_por_el_formulario(self):
+        pago = Pago(membresia=self.membresia, monto=Decimal("50.00"), metodo_pago="QR")
+
+        validar_pago(pago)
+
+        self.assertEqual(pago.membresia_id, self.membresia.id)
+
     def test_anulacion_conserva_pago_y_lo_excluye_del_total(self):
         pago = Pago(membresia_id=self.membresia.id, monto=Decimal("75.00"), metodo_pago="QR")
         validar_pago(pago)

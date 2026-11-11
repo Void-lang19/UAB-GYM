@@ -39,6 +39,8 @@ ROLE_PERMISSIONS: dict[str, frozenset[tuple[str, str]]] = {
             ("menu_access", "Reporte de asistencias"),
             ("can_consultar", "ReporteMembresiasView"),
             ("can_consultar", "ReporteAsistenciasView"),
+            ("menu_access", "Asistente IA"),
+            ("can_consultar", "AsistenteView"),
         }
     ),
     "Entrenador": frozenset(
@@ -73,6 +75,8 @@ MANAGED_VIEW_MENUS = frozenset(
         "ReporteMembresiasView",
         "ReportePagosView",
         "ReporteAsistenciasView",
+        "Asistente IA",
+        "AsistenteView",
     }
 )
 

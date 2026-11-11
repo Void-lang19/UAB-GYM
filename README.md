@@ -15,6 +15,10 @@ Construir una aplicación administrativa modular para gestionar socios, entrenad
 - PyMySQL como controlador de MySQL.
 - Git y GitHub.
 
+## Interfaz
+
+La interfaz usa español latinoamericano y una paleta institucional azul y blanca: `#0474C4`, `#5379AE`, `#FFFFFF`, `#A8C4EC`, `#06457F` y `#262B40`. El tema se aplica a las pantallas administrativas generadas por Flask-AppBuilder, los reportes y el asistente. El acceso tiene un diseño propio y el inicio muestra únicamente los módulos permitidos para la cuenta, en un diseño adaptable a móviles.
+
 ## Requisitos previos
 
 1. Instala Python desde [python.org](https://www.python.org/downloads/windows/) y habilita **Add Python to PATH** durante la instalación. Comprueba la instalación en PowerShell:
@@ -88,7 +92,7 @@ Edita `.env` y reemplaza `SECRET_KEY` por una clave aleatoria generada con:
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
+Copia el resultado en `SECRET_KEY` dentro de `.env`. Ajusta `DB_USER` y `DB_PASSWORD` si tu instalación de MySQL no usa `root` sin contraseña. El asistente puede usar Ollama local (sin clave de API) u OpenAI; sus variables se detallan en la sección **Asistente IA**. Nunca subas `.env` a Git; el repositorio ignora ese archivo y mantiene únicamente `.env.example`.
 
 ### 6. Crear las tablas iniciales, comprobar la conexión y ejecutar
 
@@ -99,6 +103,14 @@ flask --app app:create_app init-db
 ```
 
 El comando crea las tablas de socios, entrenadores, planes, membresías, pagos y asistencias si todavía no existen; no elimina ni reinicia tablas. Flask-AppBuilder también administra sus tablas internas de seguridad. Los reportes consultan estas tablas y no necesitan tablas adicionales.
+
+Para cargar registros ficticios de prueba en cada módulo:
+
+```powershell
+flask --app app:create_app seed-demo
+```
+
+Agrega 3 socios, 2 entrenadores, 3 planes, 3 membresías, 4 pagos y 3 asistencias con datos de ejemplo sin etiquetas de demostración en las pantallas. Son datos ficticios para el prototipo; no corresponden a personas ni transacciones reales. La carga no reemplaza otros registros y se puede volver a ejecutar sin duplicar los ejemplos. Úsala solo en una base de desarrollo.
 
 Verifica la conexión a `uab_gym`:
 
@@ -338,18 +350,43 @@ Se utilizan encabezados españoles, codificación `utf-8-sig` (BOM), separador `
 
 Los textos que podrían interpretarse como fórmulas (`=`, `+`, `-`, `@`, tabulaciones o saltos de línea, incluso después de espacios) se prefijan con apóstrofo solo al exportarlos. Los datos originales no cambian. Las filas se recorren por lotes y el archivo se prepara en almacenamiento temporal, volcando a disco cuando supera 1 MiB; así no se cargan todos los registros en memoria y se detectan fallos antes de iniciar la descarga.
 
+## Asistente IA
+
+La pantalla **Reportes → Asistente IA** (`/asistente/`) permite preguntar en español por indicadores de membresías y asistencias. Admin también puede preguntar por pagos e ingresos; Recepcionista no consulta ni envía cifras financieras mediante el asistente. Entrenador no tiene acceso.
+
+El backend obtiene los agregados con las consultas SQL de los reportes y comparte con el proveedor configurado (OpenAI u Ollama) únicamente totales e indicadores de contexto histórico, mes actual y últimos 30 días. No comparte filas, nombres, documentos, teléfonos, correos ni referencias de pago. Con Ollama, el modelo se ejecuta en el equipo local. La IA redacta la respuesta, no ejecuta SQL, no decide filtros de acceso y no puede modificar datos. La integración usa el SDK de OpenAI y su API Responses compatible con Ollama.
+
+El asistente admite dos proveedores. **Ollama local** es la opción recomendada para probar sin pagar por solicitudes y mantenerlas en el equipo. Descarga e instala Ollama desde [ollama.com/download/windows](https://ollama.com/download/windows), abre PowerShell y descarga un modelo pequeño compatible con español:
+
+```powershell
+ollama pull llama3.2:3b
+ollama run llama3.2:3b
+```
+
+Deja Ollama ejecutándose y configura estas variables en `.env`:
+
+```dotenv
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
+OLLAMA_MODEL=llama3.2:3b
+```
+
+La aplicación se conecta al endpoint local compatible con OpenAI; no necesita `OPENAI_API_KEY` para Ollama. La documentación oficial de Ollama describe su API local compatible con Responses en `http://localhost:11434/v1/`.
+
+Para volver a OpenAI, usa `AI_PROVIDER=openai`, configura `OPENAI_API_KEY` y, de forma opcional, `OPENAI_MODEL`. También existe una cuota gratuita limitada para algunos modelos en Gemini API; revisa las condiciones y privacidad actuales antes de enviar datos. Con el proveedor local, las respuestas dependen de la memoria y el rendimiento del equipo.
+
 ### Organización y pruebas pendientes
 
 `app/services_reportes.py` reúne las selecciones, agregaciones y paginación SQL. `app/reportes_filtros.py` valida parámetros y `app/reportes_csv.py` formatea archivos. `app/views/reportes.py` define tres vistas de solo lectura, registradas por `appbuilder`; las plantillas de `app/templates/reportes/` reutilizan un diseño común. Esta organización sigue las [vistas protegidas BaseView de Flask-AppBuilder](https://flask-appbuilder.readthedocs.io/en/latest/views.html).
 
-Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py` y `test_reportes_security.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, accesos por URL, errores y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
+Se dejaron escritas pruebas en `test_reporte_membresias.py`, `test_reporte_pagos.py`, `test_reporte_asistencias.py`, `test_reportes_filtros_csv.py`, `test_reportes_security.py` y `test_asistente.py`. Cubren categorías y límites inclusivos, parciales y anulados, precisión, medianoche UTC/La Paz, agrupaciones, páginas y exportaciones completas, filtros inválidos, fórmulas CSV, privacidad, acceso del asistente por rol, envío solo de agregados y ausencia de escrituras. Los datos de ejemplo existen únicamente en fixtures SQLite en memoria.
 
-**Validación local:** la suite completa se ejecutó con Python 3.13.5 y Flask-AppBuilder 5.3.0: 59 pruebas aprobadas sobre SQLite en memoria. Esto cubre el renderizado de las vistas, permisos por sesión, consultas y exportaciones. La conexión y el comportamiento específico de MySQL/MariaDB aún deben comprobarse en el entorno que tenga XAMPP:
+**Validación local:** las pruebas cubren los módulos, permisos, reportes, el asistente y la interfaz. La integración actual combina cambios de ambas ramas y añade casos para las relaciones de membresías, pagos y asistencias; ejecuta la suite completa después de integrar para validar el conjunto:
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-Queda verificar las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios) y la apertura de los CSV en Excel en el equipo de despliegue. Los reportes no requieren migraciones ni nuevas dependencias.
+Queda verificar las consultas sobre MySQL/MariaDB (incluyendo agrupaciones y límites horarios) y la apertura de los CSV en Excel en el equipo de despliegue. Los reportes no requieren migraciones; el asistente añade el SDK de OpenAI como dependencia.
 
 La inicialización de las vistas excluye las propiedades híbridas de los campos de búsqueda de Flask-AppBuilder, que solo admite columnas mapeadas en ese formulario. La validación de pagos nuevos considera `estado=None` como válido, igual que el valor predeterminado aplicado al insertar.

@@ -1,4 +1,5 @@
 import codecs
+import os
 import unittest
 from unittest.mock import patch
 
@@ -23,6 +24,12 @@ class ReportesSecurityTests(unittest.TestCase):
             "SECRET_KEY": "reportes-test-" + "x" * 48,
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+            "APP_NAME": "UAB GYM",
+            "APP_THEME": "",
+            "BABEL_DEFAULT_LOCALE": "es",
+            "BABEL_DEFAULT_TIMEZONE": "America/La_Paz",
+            "BABEL_TRANSLATION_DIRECTORIES": os.path.abspath("app/translations"),
+            "LANGUAGES": {"es": {"flag": "es", "name": "Español (Latinoamérica)"}},
             "AUTH_TYPE": AUTH_DB, "AUTH_ROLE_ADMIN": "Admin",
             "AUTH_USER_REGISTRATION": False, "WTF_CSRF_ENABLED": False, "TESTING": True,
         }
@@ -74,6 +81,9 @@ class ReportesSecurityTests(unittest.TestCase):
 
     def test_admin_accede_a_tres_pantallas_y_tres_exportaciones(self):
         cliente = self.cliente("Admin")
+        asistente = cliente.get("/asistente/")
+        self.assertEqual(asistente.status_code, 200)
+        self.assertIn("no-store", asistente.headers["Cache-Control"])
         for tipo in ("membresias", "pagos", "asistencias"):
             with self.subTest(tipo=tipo):
                 respuesta = cliente.get(f"/reportes/{tipo}/")
@@ -86,8 +96,43 @@ class ReportesSecurityTests(unittest.TestCase):
                 self.assertNotIn(b"PRUEBA-ANA", respuesta.data)
                 respuesta.close()
 
+    def test_login_inicio_y_tema_global_se_renderizan(self):
+        anonimo = self.app.test_client()
+        login = anonimo.get("/login/")
+        self.assertEqual(login.status_code, 200)
+        self.assertIn(b"Inicia sesi\xc3\xb3n", login.data)
+        self.assertIn(b"uab-gym.css", login.data)
+
+        cliente = self.cliente("Admin")
+        inicio = cliente.get("/")
+        self.assertEqual(inicio.status_code, 200)
+        self.assertIn(b"Administraci\xc3\xb3n del gimnasio", inicio.data)
+        self.assertIn(b"Reporte de membres\xc3\xadas", inicio.data)
+        tema = cliente.get("/static/css/uab-gym.css")
+        self.assertEqual(tema.status_code, 200)
+        self.assertIn(b"#0474C4", tema.data)
+        tema.close()
+        usuarios = cliente.get("/users/list/")
+        self.assertEqual(usuarios.status_code, 200)
+        self.assertIn(b"Lista de usuarios", usuarios.data)
+        with self.app.test_request_context():
+            from flask_babel import gettext
+
+            self.assertEqual(gettext("Add"), "Agregar")
+
     def test_recepcionista_solo_membresias_y_asistencias(self):
         cliente = self.cliente("Recepcionista")
+        asistente = cliente.get("/asistente/")
+        self.assertEqual(asistente.status_code, 200)
+        with (
+            patch("app.views.asistente.construir_contexto", return_value={"asistencias": {}}) as contexto,
+            patch("app.views.asistente.responder_pregunta", return_value="Respuesta de prueba") as responder,
+        ):
+            respuesta = cliente.post("/asistente/", data={"pregunta": "¿Cuántas asistencias?"})
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn(b"Respuesta de prueba", respuesta.data)
+        contexto.assert_called_once_with(administrador=False)
+        responder.assert_called_once()
         for tipo in ("membresias", "asistencias"):
             for sufijo in ("", "exportar.csv"):
                 respuesta = cliente.get(f"/reportes/{tipo}/{sufijo}")
@@ -103,6 +148,7 @@ class ReportesSecurityTests(unittest.TestCase):
                 for sufijo in ("", "exportar.csv"):
                     with self.subTest(rol=rol, tipo=tipo, sufijo=sufijo):
                         self.assert_denegado(cliente.get(f"/reportes/{tipo}/{sufijo}"))
+            self.assert_denegado(cliente.get("/asistente/"))
 
     def test_exportacion_y_pantalla_comparten_permiso(self):
         with self.app.app_context():

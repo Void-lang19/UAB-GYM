@@ -3,7 +3,7 @@ import unittest
 
 from app import db
 from app.models import Asistencia, Membresia
-from app.services import preparar_membresia, registrar_entrada, registrar_salida
+from app.services import preparar_membresia, registrar_entrada, registrar_salida, validar_asistencia
 from app.views.asistencias import AsistenciaModelView
 from tests._modulos_support import app, limpiar_base, crear_datos_basicos
 
@@ -40,6 +40,19 @@ class AsistenciaServiceTests(unittest.TestCase):
         db.session.commit()
         with self.assertRaisesRegex(ValueError, "no tiene una membresía vigente"):
             registrar_entrada(self.socio.id)
+
+    def test_valida_asistencia_con_relaciones_asignadas_por_el_formulario(self):
+        entrada = datetime.combine(date.today(), datetime.min.time()) + timedelta(hours=10)
+        asistencia = Asistencia(
+            socio=self.socio,
+            membresia=self.membresia,
+            fecha_hora_entrada=entrada,
+        )
+
+        validar_asistencia(asistencia)
+
+        self.assertEqual(asistencia.socio_id, self.socio.id)
+        self.assertEqual(asistencia.membresia_id, self.membresia.id)
 
 
 if __name__ == "__main__":
